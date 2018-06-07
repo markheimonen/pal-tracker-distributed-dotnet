@@ -7,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Steeltoe.CloudFoundry.Connector.MySql.EFCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Steeltoe.Security.Authentication.CloudFoundry;
 
 namespace AllocationsServer
 {
@@ -37,6 +39,13 @@ namespace AllocationsServer
 
                 return new ProjectClient(httpClient);
             });
+                    
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                 .AddCloudFoundryJwtBearer(Configuration);
+
+            services.AddAuthorization(options =>
+                options.AddPolicy("pal-tracker", policy => policy.RequireClaim("scope", "uaa.resource")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,6 +54,7 @@ namespace AllocationsServer
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            app.UseAuthentication();   
             app.UseMvc();
         }
     }
