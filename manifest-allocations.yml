@@ -5,7 +5,6 @@ applications:
   memory: 256M
   host: allocations-pal-MHCD
   path: Applications/AllocationsServer/bin/Release/netcoreapp2.0/publish
-  env:
-    REGISTRATION_SERVER_ENDPOINT: https://registration-pal-MHCD.apps.pikes.pal.pivotal.io
   services:
   - tracker-allocations-database
+  - tracker-service-registry
