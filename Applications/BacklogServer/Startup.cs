@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.Http;
 using Backlog;
+using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +12,7 @@ using Steeltoe.CloudFoundry.Connector.MySql.EFCore;
 using Pivotal.Discovery.Client;
 using Steeltoe.Common.Discovery;
 using Steeltoe.CircuitBreaker.Hystrix;
-
+using Microsoft.AspNetCore.Authentication;
 
 namespace BacklogServer
 {
@@ -32,6 +34,8 @@ namespace BacklogServer
             services.AddDbContext<StoryContext>(options => options.UseMySql(Configuration));
             services.AddScoped<IStoryDataGateway, StoryDataGateway>();
 
+             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddSingleton<IProjectClient>(sp =>
             {
                 var handler = new DiscoveryHttpClientHandler(sp.GetService<IDiscoveryClient>());
@@ -41,7 +45,12 @@ namespace BacklogServer
                 };
 
                 var logger = sp.GetService<ILogger<ProjectClient>>();
-                return new ProjectClient(httpClient, logger);
+                var contextAccessor = sp.GetService<IHttpContextAccessor>();
+
+                return new ProjectClient(
+                     httpClient, logger,
+                     () => contextAccessor.HttpContext.GetTokenAsync("access_token")
+                 );
             });
 
             services.AddHystrixMetricsStream(Configuration);

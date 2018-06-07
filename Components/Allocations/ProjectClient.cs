@@ -3,6 +3,8 @@ using System.Net.Http;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
+using System;
 
 namespace Allocations
 {
@@ -12,6 +14,7 @@ namespace Allocations
         private Dictionary<long, ProjectInfo> _cache;
         private readonly ILogger<ProjectClient> _logger;
         private readonly Func<Task<string>> _accessTokenFn;
+
 
         public ProjectClient(HttpClient client, ILogger<ProjectClient> logger, Func<Task<string>> accessTokenFn)
         {
@@ -26,7 +29,7 @@ namespace Allocations
 
         public async Task<ProjectInfo> DoGet(long projectId)
         {
-               var token = await _accessTokenFn();
+            var token = await _accessTokenFn();
 
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

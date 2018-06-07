@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using Allocations;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -36,6 +37,8 @@ namespace AllocationsServer
             services.AddDbContext<AllocationContext>(options => options.UseMySql(Configuration));
             services.AddScoped<IAllocationDataGateway, AllocationDataGateway>();
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddSingleton<IProjectClient>(sp =>
             {
                 var handler = new DiscoveryHttpClientHandler(sp.GetService<IDiscoveryClient>());
@@ -45,7 +48,12 @@ namespace AllocationsServer
                 };
 
                 var logger = sp.GetService<ILogger<ProjectClient>>();
-                return new ProjectClient(httpClient, logger);
+                var contextAccessor = sp.GetService<IHttpContextAccessor>();
+
+                return new ProjectClient(
+                     httpClient, logger,
+                     () => contextAccessor.HttpContext.GetTokenAsync("access_token")
+                 );
             });
 
             services.AddHystrixMetricsStream(Configuration);

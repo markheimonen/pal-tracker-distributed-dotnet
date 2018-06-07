@@ -5,11 +5,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+
 using Steeltoe.CloudFoundry.Connector.MySql.EFCore;
 using Timesheets;
 using Pivotal.Discovery.Client;
 using Steeltoe.Common.Discovery;
 using Steeltoe.CircuitBreaker.Hystrix;
+using Microsoft.AspNetCore.Authentication;
 
 namespace TimesheetsServer
 {
@@ -31,6 +34,9 @@ namespace TimesheetsServer
             services.AddDbContext<TimeEntryContext>(options => options.UseMySql(Configuration));
             services.AddScoped<ITimeEntryDataGateway, TimeEntryDataGateway>();
             
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddSingleton<IProjectClient>(sp =>
             {
                 var handler = new DiscoveryHttpClientHandler(sp.GetService<IDiscoveryClient>());
@@ -40,7 +46,10 @@ namespace TimesheetsServer
                 };
 
                 var logger = sp.GetService<ILogger<ProjectClient>>();
-                return new ProjectClient(httpClient, logger);
+            return new ProjectClient(
+                     httpClient, logger,
+                     () => contextAccessor.HttpContext.GetTokenAsync("access_token")
+                 );
             });
 
             services.AddHystrixMetricsStream(Configuration);
