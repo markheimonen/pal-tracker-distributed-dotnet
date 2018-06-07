@@ -21,6 +21,10 @@ namespace BacklogServer
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            if (Configuration.GetValue("DISABLE_AUTH", false))
+            {
+               services.DisableClaimsVerification();
+            }
         }
 
         public IConfiguration Configuration { get; }
