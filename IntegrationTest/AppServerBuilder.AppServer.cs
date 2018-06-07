@@ -79,10 +79,10 @@ namespace IntegrationTest
                     try
                     {
                         var _ = httpClient.GetAsync(_baseUrl).Result;
-                     SetEnvironmentVariable
-                    }SetEnvironmentVariable
-                    cSetEnvironmentVariablexception().GetType() == typeof(HttpRequestException))
-                    {SetEnvironmentVariable
+                        return;
+                    }
+                    catch (Exception ex) when(ex.GetBaseException().GetType() == typeof(HttpRequestException))
+                    {
                         failureReason = ex;
                         Thread.Sleep(delay);
                     }
