@@ -16,7 +16,8 @@ namespace BacklogTest
         public StoryControllerTest()
         {
             _gateway = new Mock<IStoryDataGateway>();
-            _client = new Mock<IProjectClient>();
+            _client = new ProjectClient(_client, new LoggerFactory().CreateLogger<ProjectClient>(),     
+                ()) => Task.FromResult("anAccessToken"));
             _controller = new StoryController(_gateway.Object, _client.Object);
         }
 

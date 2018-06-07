@@ -17,7 +17,8 @@ namespace AllocationsTest
         public AllocationsControllerTest()
         {
             _gateway = new Mock<IAllocationDataGateway>();
-            _client = new Mock<IProjectClient>();
+            _client = new ProjectClient(_client, new LoggerFactory().CreateLogger<ProjectClient>(),     
+                ()) => Task.FromResult("anAccessToken"));
             _controller = new AllocationController(_gateway.Object, _client.Object);
         }
 

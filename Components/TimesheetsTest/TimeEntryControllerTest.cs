@@ -17,7 +17,8 @@ namespace TimesheetsTest
         public TimeEntryControllerTest()
         {
             _gateway = new Mock<ITimeEntryDataGateway>();
-            _client = new Mock<IProjectClient>();
+                _client = new ProjectClient(_client, new LoggerFactory().CreateLogger<ProjectClient>(),     
+                ()) => Task.FromResult("anAccessToken"));
             _controller = new TimeEntryController(_gateway.Object, _client.Object);
         }
 
